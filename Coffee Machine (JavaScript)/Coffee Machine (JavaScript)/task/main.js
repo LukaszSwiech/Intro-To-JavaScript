@@ -99,7 +99,7 @@ function countNewState (coffee) {
     }
 }
 
-function printState() {
+function printCoffeeMachineState() {
 
     console.log(`The coffee machine has:
     ${machineState.water} ml of water
@@ -109,7 +109,7 @@ function printState() {
     ${machineState.money} of money`);
 }
 
-function CoffeeMachine () {
+function UseCoffeeMachine () {
     do {
         let action = input("Write action (buy, fill, take, remaining, exit):").toLowerCase();
         switch (action) {
@@ -123,7 +123,7 @@ function CoffeeMachine () {
                 take();
                 break
             case "remaining":
-                printState()
+                printCoffeeMachineState()
                 break
             case "exit":
                 return
@@ -131,5 +131,5 @@ function CoffeeMachine () {
     } while (true)
 }
 
-CoffeeMachine ()
+UseCoffeeMachine ()
 
