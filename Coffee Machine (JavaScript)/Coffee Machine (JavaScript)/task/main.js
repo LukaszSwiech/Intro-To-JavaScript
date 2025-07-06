@@ -31,13 +31,16 @@ let cappuccino = {
     money: 6
 }
 
-function countCups() {
-    for (let ingredient in espresso) {
-        if (Math.floor(machineState[ingredient] / espresso[ingredient]) < maxCoffees)
+function countCups(coffee) {
+    for (let ingredient in machineState) {
+        if (ingredient === "money")
+            continue
+        if (Math.floor(machineState[ingredient] / coffee[ingredient]) === 0)
         {
-            maxCoffees = Math.floor(machineState[ingredient] / espresso[ingredient]);
+            return `${ingredient}`
         }
     }
+    return "1";
 }
 
 
@@ -54,7 +57,6 @@ function fill() {
         {
             machineState[ingredient] += addIngredients[ingredient]
         }
-    printState()
     }
 
 
@@ -62,7 +64,6 @@ function take()
     {
         console.log(`I gave you ${machineState.money}`)
         machineState["money"] = 0;
-        printState()
     }
 
 
@@ -83,13 +84,19 @@ function buy()
     }
 
 function countNewState (coffee) {
-    for (let ingredient in coffee) {
-        ingredient !== "money"
-        ? machineState[ingredient] -= coffee[ingredient]
-        : machineState.money += coffee.money;
+    let remaining = countCups(coffee)
+    if (remaining !== "1") {
+        `Sorry, not enough ${remaining}`
     }
-    machineState.disposableCups--
-    printState()
+    else {
+        console.log("I have enough resources, making you a coffee!")
+        for (let ingredient in coffee) {
+            ingredient !== "money"
+                ? machineState[ingredient] -= coffee[ingredient]
+                : machineState.money += coffee.money;
+        }
+        machineState.disposableCups--
+    }
 }
 
 function printState() {
@@ -102,19 +109,27 @@ function printState() {
     ${machineState.money} of money`);
 }
 
-printState()
+function CoffeeMachine () {
+    do {
+        let action = input("Write action (buy, fill, take, remaining, exit):").toLowerCase();
+        switch (action) {
+            case "buy":
+                buy();
+                break
+            case "fill":
+                fill();
+                break
+            case "take":
+                take();
+                break
+            case "remaining":
+                printState()
+                break
+            case "exit":
+                return
+        }
+    } while (true)
+}
 
-let action = input("Write action (buy, fill, take):").toLowerCase();
+CoffeeMachine ()
 
-switch (action)
-    {
-        case "buy":
-            buy();
-            break
-        case "fill":
-            fill();
-            break
-        case "take":
-            take();
-            break
-    }
