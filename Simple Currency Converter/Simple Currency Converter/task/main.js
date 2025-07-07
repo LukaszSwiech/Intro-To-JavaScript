@@ -17,10 +17,14 @@ let exchangeRates = {
 
 console.log("Welcome to Currency Converter!")
 printExchangeRate(exchangeRates);
-console.log(`I can convert USD to these currencies: JPY, EUR, RUB, USD, GBP`);
-console.log("Type the currency you wish to convert: USD")
-let selectedCurrency = input("To:").toUpperCase()
-if (!Object.keys(exchangeRates).includes(selectedCurrency) ) {
+console.log(`What do you want to convert?`);
+let exchangeFromCurrency = input("From:").toUpperCase()
+if (!Object.keys(exchangeRates).includes(exchangeFromCurrency) ) {
+    console.log("Unknown currency")
+    return
+}
+let exchangeToCurrency = input("To:").toUpperCase()
+if (!Object.keys(exchangeRates).includes(exchangeToCurrency) ) {
     console.log("Unknown currency")
     return
 }
@@ -33,7 +37,7 @@ else if (amountToExchange < 1) {
     console.log('The amount cannot be less than 1')
 }
 else {
-    console.log(`Result: ${amountToExchange} USD equals ${(amountToExchange * exchangeRates[selectedCurrency]).toFixed(4)} ${selectedCurrency}`);
+    console.log(`Result: ${amountToExchange} ${exchangeFromCurrency} equals ${(amountToExchange / exchangeRates[exchangeFromCurrency] * exchangeRates[exchangeToCurrency]).toFixed(4)} ${exchangeToCurrency}`);
 }
 
 
