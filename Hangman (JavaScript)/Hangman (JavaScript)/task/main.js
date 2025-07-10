@@ -1,32 +1,93 @@
 const input = require('sync-input');
 let guess;
-let chooseGameAction;
-const game = {
+let choice;
+const HANGMAN_GAME = {
     name: "H A N G M A N",
-    lives: 8,
+    initialLives: 8,
     words: ["python", "java", "swift", "javascript"],
-    won: 0,
-    lost: 0
-};
-gameIntro();
+    statistics: {
+        won: 0,
+        lost: 0
+    }
+}
+let gameState = {
+    lives: HANGMAN_GAME.initialLives,
+    currentWord: "",
+    guessedLetters: [],
+    currentProgress: []
+}
 
-let running = true;
-while (running) {
+const displayGameIntro = () => {
+    console.log(HANGMAN_GAME.name);
+    console.log();
+}
 
-    chooseGameAction = input(`Type "play" to play the game, "results" to show the scoreboard, and "exit" to quit:`)
+const initializeGame = () => {
+    const getRandomAnswer = () => HANGMAN_GAME.words[Math.floor(Math.random() * HANGMAN_GAME.words.length)];
+    HANGMAN_GAME.correctAnswer = getRandomAnswer();
+    HANGMAN_GAME.currentState = new Array(HANGMAN_GAME.correctAnswer.length).fill('-');
+}
 
-    switch (chooseGameAction) {
+const getUserInput = () => {
+    console.log(HANGMAN_GAME.currentState.join(''));
+    return input("Input a letter: ");
+}
 
+const checkAnswer = (answer) => {
+    return HANGMAN_GAME.correctAnswer.includes(answer);
+}
+
+const processCorrectGuess = (guess) => {
+    // Find all positions of the guessed letter
+    for (let i = 0; i < HANGMAN_GAME.correctAnswer.length; i++) {
+        if (HANGMAN_GAME.correctAnswer[i] === guess) {
+            HANGMAN_GAME.currentState[i] = guess;
+        }
+    }
+}
+
+const processIncorrectGuess = () => {
+    console.log(`That letter doesn't appear in the word.`);
+    HANGMAN_GAME.initialLives--;
+}
+
+const checkUserInputLength = (userInput) => {
+    return (userInput.length > 1)
+}
+
+const checkLowerCase = (userInput) => {
+    return !/^[a-z]$/.test(userInput)
+}
+
+const displayResults = () => {
+    console.log(`you won: ${HANGMAN_GAME.statistics.won} times.`);
+    console.log(`you lost: ${HANGMAN_GAME.statistics.lost} times.`);
+}
+
+const getMenuChoice = () => {
+    return input('Type "play" to play the game, "results" to show the scoreboard, and "exit" to quit:');
+}
+const handleLoss= () => {
+    console.log('You lost!')
+    HANGMAN_GAME.lost++;
+}
+
+displayGameIntro();
+
+let isRunning = true;
+while (isRunning) {
+
+    choice = getMenuChoice()
+
+    switch (choice) {
         case "results":
-            console.log(`you won: ${game.won} times.\nyou lost: ${game.lost} times.`)
+            displayResults()
             break;
-
         case "exit":
-            running = false;
+            isRunning = false;
             break;
-
         case "play":
-            gamePrepare()
+            initializeGame()
             do {
                 guess = getUserInput();
 
@@ -40,75 +101,31 @@ while (running) {
                     continue
                 }
 
-                if (game.currentState.includes(guess)) {
+                if (HANGMAN_GAME.currentState.includes(guess)) {
                     console.log(`You've already guessed this letter.`)
                     continue;
                 }
-                (checkAnswer(guess)) ? correctAnswer(guess) : wrongAnswer();
+                (checkAnswer(guess)) ? processCorrectGuess(guess) : processIncorrectGuess();
 
-                if (game.currentState.join('') === game.correctAnswer) {
-                    console.log(`You guessed the word ${game.correctAnswer}!`)
+                if (HANGMAN_GAME.currentState.join('') === HANGMAN_GAME.correctAnswer) {
+                    console.log(`You guessed the word ${HANGMAN_GAME.correctAnswer}!`)
                     console.log('You survived!')
-                    game.won++;
+                    HANGMAN_GAME.won++;
                     break;
                 }
 
-                const attemptText = game.lives === 1 ? "attempt" : "attempts";
-                console.log(`//  ${game.lives} ${attemptText}`);
+                const attemptText = HANGMAN_GAME.initialLives === 1 ? "attempt" : "attempts";
+                console.log(`//  ${HANGMAN_GAME.initialLives} ${attemptText}`);
                 console.log();
 
-            } while (game.lives > 0);
+            } while (HANGMAN_GAME.initialLives > 0);
 
-            if (game.lives === 0) {
-                console.log('You lost!')
-                game.lost++;
+            if (HANGMAN_GAME.initialLives === 0) {
+                handleLoss()
             }
             break;
-
         default:
             break;
 
     }
-}
-
-function gameIntro() {
-    console.log(game.name);
-    console.log();
-}
-
-function gamePrepare() {
-    const getRandomAnswer = () => game.words[Math.floor(Math.random() * game.words.length)];
-    game.correctAnswer = getRandomAnswer();
-    game.currentState = new Array(game.correctAnswer.length).fill('-');
-}
-
-function getUserInput() {
-    console.log(game.currentState.join(''));
-    return input("Input a letter: ");
-}
-
-function checkAnswer(answer) {
-    return game.correctAnswer.includes(answer);
-}
-
-function correctAnswer(guess) {
-    // Find all positions of the guessed letter
-    for (let i = 0; i < game.correctAnswer.length; i++) {
-        if (game.correctAnswer[i] === guess) {
-            game.currentState[i] = guess;
-        }
-    }
-}
-
-function wrongAnswer() {
-    console.log(`That letter doesn't appear in the word.`);
-    game.lives--;
-}
-
-function checkUserInputLength(userInput) {
-    return (userInput.length > 1)
-}
-
-function checkLowerCase(userInput) {
-    return !/^[a-z]$/.test(userInput)
 }
