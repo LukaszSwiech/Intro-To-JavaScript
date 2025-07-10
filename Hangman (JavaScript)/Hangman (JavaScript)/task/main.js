@@ -1,51 +1,74 @@
 const input = require('sync-input');
 let guess;
-let gameMode;
+let chooseGameAction;
 const game = {
     name: "H A N G M A N",
     lives: 8,
     words: ["python", "java", "swift", "javascript"],
+    won: 0,
+    lost: 0
 };
 gameIntro();
 
+let running = true;
+while (running) {
 
+    chooseGameAction = input(`Type "play" to play the game, "results" to show the scoreboard, and "exit" to quit:`)
 
-gamePrepare();
+    switch (chooseGameAction) {
 
+        case "results":
+            console.log(`you won: ${game.won} times.\nyou lost: ${game.lost} times.`)
+            break;
 
-do {
-    guess = getUserInput();
+        case "exit":
+            running = false;
+            break;
 
-    if (checkUserInputLength(guess)) {
-        console.log("Please, input a single letter.")
-        continue
+        case "play":
+            gamePrepare()
+            do {
+                guess = getUserInput();
+
+                if (checkUserInputLength(guess)) {
+                    console.log("Please, input a single letter.")
+                    continue
+                }
+
+                if (checkLowerCase(guess)) {
+                    console.log("Please, enter a lowercase letter from the English alphabet.")
+                    continue
+                }
+
+                if (game.currentState.includes(guess)) {
+                    console.log(`You've already guessed this letter.`)
+                    continue;
+                }
+                (checkAnswer(guess)) ? correctAnswer(guess) : wrongAnswer();
+
+                if (game.currentState.join('') === game.correctAnswer) {
+                    console.log(`You guessed the word ${game.correctAnswer}!`)
+                    console.log('You survived!')
+                    game.won++;
+                    break;
+                }
+
+                const attemptText = game.lives === 1 ? "attempt" : "attempts";
+                console.log(`//  ${game.lives} ${attemptText}`);
+                console.log();
+
+            } while (game.lives > 0);
+
+            if (game.lives === 0) {
+                console.log('You lost!')
+                game.lost++;
+            }
+            break;
+
+        default:
+            break;
+
     }
-
-    if (checkLowerCase(guess)) {
-        console.log("Please, enter a lowercase letter from the English alphabet.")
-        continue
-    }
-
-    if (game.currentState.includes(guess)) {
-        console.log(`You've already guessed this letter.`)
-        continue;
-    }
-    (checkAnswer(guess)) ? correctAnswer(guess) : wrongAnswer();
-
-    if (game.currentState.join('') === game.correctAnswer) {
-        console.log(`You guessed the word ${game.correctAnswer}!`)
-        console.log('You survived!')
-        break;
-    }
-
-    const attemptText = game.lives === 1 ? "attempt" : "attempts";
-    console.log(`//  ${game.lives} ${attemptText}`);
-    console.log();
-
-} while (game.lives > 0);
-
-if (game.lives === 0) {
-    console.log('You lost!')
 }
 
 function gameIntro() {
@@ -58,8 +81,6 @@ function gamePrepare() {
     game.correctAnswer = getRandomAnswer();
     game.currentState = new Array(game.correctAnswer.length).fill('-');
 }
-
-
 
 function getUserInput() {
     console.log(game.currentState.join(''));
