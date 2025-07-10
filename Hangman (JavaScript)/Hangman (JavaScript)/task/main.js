@@ -1,61 +1,93 @@
-const input = require('sync-input')
-let userInput
-let guess
-let guessCheck
-let index = 0
-let game = {
+const input = require('sync-input');
+let guess;
+let gameMode;
+const game = {
     name: "H A N G M A N",
-    lives:  8,
+    lives: 8,
     words: ["python", "java", "swift", "javascript"],
-    finalMessage: "Thanks for playing!"
-}
+};
+gameIntro();
 
-gamePrepare()
-gameIntro()
+
+
+gamePrepare();
+
 
 do {
+    guess = getUserInput();
 
-    guess = gameIteration();
-    guessCheck = checkAnswer(guess);
-    guessCheck ? correctAnswer(guess, game.correctAnswer) : wrongAnswer()
+    if (checkUserInputLength(guess)) {
+        console.log("Please, input a single letter.")
+        continue
+    }
 
-    console.log(`//  ${--game.lives} attempts`)
+    if (checkLowerCase(guess)) {
+        console.log("Please, enter a lowercase letter from the English alphabet.")
+        continue
+    }
 
-} while (game.lives > 0)
+    if (game.currentState.includes(guess)) {
+        console.log(`You've already guessed this letter.`)
+        continue;
+    }
+    (checkAnswer(guess)) ? correctAnswer(guess) : wrongAnswer();
 
-console.log(game.finalMessage)
+    if (game.currentState.join('') === game.correctAnswer) {
+        console.log(`You guessed the word ${game.correctAnswer}!`)
+        console.log('You survived!')
+        break;
+    }
 
+    const attemptText = game.lives === 1 ? "attempt" : "attempts";
+    console.log(`//  ${game.lives} ${attemptText}`);
+    console.log();
+
+} while (game.lives > 0);
+
+if (game.lives === 0) {
+    console.log('You lost!')
+}
+
+function gameIntro() {
+    console.log(game.name);
+    console.log();
+}
 
 function gamePrepare() {
     const getRandomAnswer = () => game.words[Math.floor(Math.random() * game.words.length)];
     game.correctAnswer = getRandomAnswer();
-    game.currentState = "-".repeat(game.correctAnswer.length);
+    game.currentState = new Array(game.correctAnswer.length).fill('-');
 }
 
-function gameIntro() {
-    console.log(game.name)
-    console.log(`//  ${game.lives} attempts`)
-}
 
-function gameIteration () {
-    console.log(game.currentState)
-    return userInput = input("Input a letter:");
+
+function getUserInput() {
+    console.log(game.currentState.join(''));
+    return input("Input a letter: ");
 }
 
 function checkAnswer(answer) {
     return game.correctAnswer.includes(answer);
 }
 
-function correctAnswer(guess, correctAnswer) {
-    index = game.correctAnswer.search(guess);
-     do {
-        game.currentState = game.currentState.substring(0, index) + guess + game.currentState.substring(index + 1)
-        correctAnswer = correctAnswer.substring(0, index) + "-" + correctAnswer.substring(index + 1)
-        index = correctAnswer.search(guess);
-    } while (index >= 0)
-
+function correctAnswer(guess) {
+    // Find all positions of the guessed letter
+    for (let i = 0; i < game.correctAnswer.length; i++) {
+        if (game.correctAnswer[i] === guess) {
+            game.currentState[i] = guess;
+        }
+    }
 }
 
 function wrongAnswer() {
-    console.log(`That letter doesn't appear in the word.`)
+    console.log(`That letter doesn't appear in the word.`);
+    game.lives--;
+}
+
+function checkUserInputLength(userInput) {
+    return (userInput.length > 1)
+}
+
+function checkLowerCase(userInput) {
+    return !/^[a-z]$/.test(userInput)
 }
